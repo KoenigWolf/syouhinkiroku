@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>販売記録管理システム</title>
+</head>
+<body>
+    <div class="container">
+        <h1>販売記録管理システム</h1>
+        <div id="login-section">
+            <h2>ログイン</h2>
+            <form id="login-form">
+                <label for="username">ユーザー名:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">パスワード:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">ログイン</button>
+            </form>
+            <h2>新規ユーザー登録</h2>
+            <form id="register-form">
+                <label for="new-username">ユーザー名:</label>
+                <input type="text" id="new-username" name="new-username" required>
+                <label for="new-password">パスワード:</label>
+                <input type="password" id="new-password" name="new-password" required>
+                <button type="submit">登録</button>
+            </form>
+        </div>
+        <div id="sales-section" style="display:none;">
+            <h2>販売記録入力</h2>
+            <form id="sales-form">
+                <label for="product-name">商品名:</label>
+                <select id="product-name" name="product-name" required>
+                    <!-- 商品リストがここに追加されます -->
+                </select>
+
+                <button type="submit">記録する</button>
+            </form>
+
+            <h2>販売記録</h2>
+            <table id="sales-table">
+                <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>販売金額（円）</th>
+                        <th>記録日時</th>
+                        <th>アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 販売記録がここに表示されます -->
+                </tbody>
+            </table>
+            <button id="export-btn">CSVとしてエクスポート</button>
+            <button id="logout-btn">ログアウト</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
