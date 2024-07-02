@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentUser) {
             salesRecords = JSON.parse(localStorage.getItem(currentUser)) || [];
             displaySalesRecords();
+            displayUserSalesSummary();
         }
     };
 
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (storedUser && storedUser.password === password) {
             currentUser = `sales_${username}`;
+            localStorage.setItem('loggedInUser', username);
             loginSection.style.display = 'none';
             salesSection.style.display = 'block';
             loadSalesRecords();
@@ -88,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ログアウト処理
     logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('loggedInUser');
         currentUser = null;
         salesRecords = [];
         loginSection.style.display = 'block';
@@ -121,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 販売記録を再表示
         displaySalesRecords();
+        displayUserSalesSummary();
     });
 
     // CSVとしてエクスポートする
@@ -144,13 +148,40 @@ document.addEventListener('DOMContentLoaded', () => {
         salesRecords.splice(index, 1);
         localStorage.setItem(currentUser, JSON.stringify(salesRecords));
         displaySalesRecords();
+        displayUserSalesSummary();
     };
 
-    // 初期表示
-    if (currentUser) {
-        loadSalesRecords();
+    // ユーザーごとの売り上げ合計を表示
+    const displayUserSalesSummary = () => {
+        const summarySection = document.getElementById('user-sales-summary');
+        const monthlySales = {};
+
+        salesRecords.forEach(record => {
+            const date = new Date(record.timestamp);
+            const month = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2); // YYYY-MM形式
+
+            if (!monthlySales[month]) {
+                monthlySales[month] = 0;
+            }
+
+            monthlySales[month] += parseInt(record.salesAmount);
+        });
+
+        summarySection.innerHTML = '';
+        for (const [month, totalSales] of Object.entries(monthlySales)) {
+            const summaryRow = document.createElement('div');
+            summaryRow.textContent = `${month}: 合計売り上げ: ${totalSales} 円`;
+            summarySection.appendChild(summaryRow);
+        }
+    };
+
+    // 初期表示時にログイン状態をチェック
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (loggedInUser) {
+        currentUser = `sales_${loggedInUser}`;
         loginSection.style.display = 'none';
         salesSection.style.display = 'block';
+        loadSalesRecords();
     } else {
         loginSection.style.display = 'block';
         salesSection.style.display = 'none';
