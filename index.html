@@ -3,59 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>販売記録管理システム</title>
+    <title>管理者ページ - 販売記録管理システム</title>
 </head>
 <body>
     <div class="container">
-        <h1>販売記録管理システム</h1>
-        <div id="login-section">
-            <h2>ログイン</h2>
-            <form id="login-form">
-                <label for="username">ユーザー名</label>
-                <input type="text" id="username" name="username" required>
-                <label for="password">パスワード</label>
-                <input type="password" id="password" name="password" required>
-                <button type="submit">ログイン</button>
-            </form>
-            <h2>新規ユーザー登録</h2>
-            <form id="register-form">
-                <label for="new-username">ユーザー名</label>
-                <input type="text" id="new-username" name="new-username" required>
-                <label for="new-password">パスワード</label>
-                <input type="password" id="new-password" name="new-password" required>
-                <button type="submit">登録</button>
-            </form>
-        </div>
-        <div id="sales-section" style="display:none;">
-            <h2>販売記録入力</h2>
-            <form id="sales-form">
-                <label for="product-name">商品名</label>
-                <select id="product-name" name="product-name" required>
-                    <!-- 商品リストがここに追加されます -->
-                </select>
-
-                <button type="submit">記録する</button>
-            </form>
-
-            <h2>販売記録</h2>
-            <div id="user-sales-summary"></div>
-            <table id="sales-table">
-                <thead>
-                    <tr>
-                        <th>商品名</th>
-                        <th>販売金額（円）</th>
-                        <th>記録日時</th>
-                        <th>アクション</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- 販売記録がここに表示されます -->
-                </tbody>
-            </table>
-            <button id="export-btn">CSVとしてエクスポート</button>
-            <button id="logout-btn">ログアウト</button>
-        </div>
-        <div id="admin-section" style="display:none;">
+        <h1>管理者ページ - 販売記録管理システム</h1>
+        <div id="admin-section">
             <h2>管理者ログイン</h2>
             <form id="admin-login-form">
                 <label for="admin-username">ユーザー名</label>
@@ -64,23 +17,89 @@
                 <input type="password" id="admin-password" name="admin-password" required>
                 <button type="submit">ログイン</button>
             </form>
-            <h2>全ユーザーの販売記録</h2>
-            <table id="admin-sales-table">
-                <thead>
-                    <tr>
-                        <th>ユーザー名</th>
-                        <th>商品名</th>
-                        <th>販売金額（円）</th>
-                        <th>記録日時</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- 全ユーザーの販売記録がここに表示されます -->
-                </tbody>
-            </table>
-            <button id="admin-logout-btn">ログアウト</button>
+            <div id="admin-data-section" style="display:none;">
+                <h2>全ユーザーの販売記録</h2>
+                <table id="admin-sales-table">
+                    <thead>
+                        <tr>
+                            <th>ユーザー名</th>
+                            <th>商品名</th>
+                            <th>販売金額（円）</th>
+                            <th>記録日時</th>
+                            <th>アクション</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 全ユーザーの販売記録がここに表示されます -->
+                    </tbody>
+                </table>
+                <h2>ユーザーの給料設定</h2>
+                <form id="salary-form">
+                    <label for="salary-username">ユーザー名</label>
+                    <input type="text" id="salary-username" name="salary-username" required>
+                    <label for="salary-amount">給料（円）</label>
+                    <input type="number" id="salary-amount" name="salary-amount" required>
+                    <button type="submit">設定</button>
+                </form>
+                <h2>ユーザーの経費登録</h2>
+                <form id="expense-form">
+                    <label for="expense-username">ユーザー名</label>
+                    <input type="text" id="expense-username" name="expense-username" required>
+                    <label for="expense-type">経費の種類</label>
+                    <select id="expense-type" name="expense-type" required>
+                        <option value="レンタカー">レンタカー</option>
+                        <option value="ガソリン代">ガソリン代</option>
+                        <option value="交通費">交通費</option>
+                        <option value="その他">その他</option>
+                    </select>
+                    <label for="expense-amount">金額（円）</label>
+                    <input type="number" id="expense-amount" name="expense-amount" required>
+                    <button type="submit">登録</button>
+                </form>
+                <h2>ユーザーごとの月次売上金額</h2>
+                <table id="user-sales-summary-table">
+                    <thead>
+                        <tr>
+                            <th>ユーザー名</th>
+                            <th>月</th>
+                            <th>合計売上金額（円）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- ユーザーごとの月次売上金額がここに表示されます -->
+                    </tbody>
+                </table>
+                <h2>営業マン売上ランキング</h2>
+                <table id="sales-ranking-table">
+                    <thead>
+                        <tr>
+                            <th>順位</th>
+                            <th>ユーザー名</th>
+                            <th>総売上金額（円）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 売上ランキングがここに表示されます -->
+                    </tbody>
+                </table>
+                <h2>ユーザーごとの経費と損益分岐点</h2>
+                <table id="expenses-table">
+                    <thead>
+                        <tr>
+                            <th>ユーザー名</th>
+                            <th>給料（円）</th>
+                            <th>経費合計（円）</th>
+                            <th>損益分岐点（円）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- ユーザーごとの経費と損益分岐点がここに表示されます -->
+                    </tbody>
+                </table>
+                <button id="admin-logout-btn">ログアウト</button>
+            </div>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
