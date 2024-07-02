@@ -1,189 +1,229 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const productData = [
-        { name: "浄水器", price: 300000 },
-        { name: "外壁塗装", price: 500000 },
-        { name: "太陽光", price: 1000000 },
-        { name: "蓄電池", price: 500000 },
-        { name: "エコキュート交換", price: 300000 },
-        { name: "カーポート", price: 100000 },
-        { name: "ウッドデッキ", price: 200000 },
-        { name: "外構", price: 100000 },
-        { name: "浄水器（本体）", price: 114350 },
-        { name: "浄水器（カバー）", price: 27000 }
-    ];
+    const adminLoginForm = document.getElementById('admin-login-form');
+    const adminUsernameInput = document.getElementById('admin-username');
+    const adminPasswordInput = document.getElementById('admin-password');
+    const adminSection = document.getElementById('admin-section');
+    const adminDataSection = document.getElementById('admin-data-section');
+    const adminSalesTableBody = document.querySelector('#admin-sales-table tbody');
+    const userSalesSummaryTableBody = document.querySelector('#user-sales-summary-table tbody');
+    const salesRankingTableBody = document.querySelector('#sales-ranking-table tbody');
+    const expensesTableBody = document.querySelector('#expenses-table tbody');
+    const adminLogoutBtn = document.getElementById('admin-logout-btn');
+    const salaryForm = document.getElementById('salary-form');
+    const salaryUsernameInput = document.getElementById('salary-username');
+    const salaryAmountInput = document.getElementById('salary-amount');
+    const expenseForm = document.getElementById('expense-form');
+    const expenseUsernameInput = document.getElementById('expense-username');
+    const expenseTypeInput = document.getElementById('expense-type');
+    const expenseAmountInput = document.getElementById('expense-amount');
 
-    const loginSection = document.getElementById('login-section');
-    const salesSection = document.getElementById('sales-section');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const newUsernameInput = document.getElementById('new-username');
-    const newPasswordInput = document.getElementById('new-password');
-    const form = document.getElementById('sales-form');
-    const productNameSelect = document.getElementById('product-name');
-    const salesTableBody = document.querySelector('#sales-table tbody');
-    const exportBtn = document.getElementById('export-btn');
-    const logoutBtn = document.getElementById('logout-btn');
+    // ユーザーごとの給料情報
+    let userSalaries = JSON.parse(localStorage.getItem('userSalaries')) || {};
+    // ユーザーごとの経費情報
+    let userExpenses = JSON.parse(localStorage.getItem('userExpenses')) || {};
 
-    let currentUser = null;
-    let salesRecords = [];
+    // 数値をカンマ区切りにフォーマットする関数
+    const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
 
-    // ローカルストレージからユーザーの販売記録を読み込む
-    const loadSalesRecords = () => {
-        if (currentUser) {
-            salesRecords = JSON.parse(localStorage.getItem(currentUser)) || [];
-            displaySalesRecords();
+    // 管理者ログイン処理
+    adminLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const adminUsername = adminUsernameInput.value.trim();
+        const adminPassword = adminPasswordInput.value;
+
+        // シンプルな認証（本番環境ではより強力な認証方法を使用することを推奨）
+        if (adminUsername === 'admin' && adminPassword === 'admin123') {
+            localStorage.setItem('loggedInAdmin', adminUsername);
+            adminLoginForm.style.display = 'none';
+            adminDataSection.style.display = 'block';
+            loadAllUserSalesRecords();
             displayUserSalesSummary();
-        }
-    };
-
-    // 販売記録をテーブルに表示する
-    const displaySalesRecords = () => {
-        salesTableBody.innerHTML = '';
-        salesRecords.forEach((record, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${record.productName}</td>
-                <td>${record.salesAmount}</td>
-                <td>${record.timestamp}</td>
-                <td>
-                    <button onclick="deleteRecord(${index})">削除</button>
-                </td>
-            `;
-            salesTableBody.appendChild(row);
-        });
-    };
-
-    // ログイン処理
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value;
-        const storedUser = JSON.parse(localStorage.getItem(`user_${username}`));
-
-        if (storedUser && storedUser.password === password) {
-            currentUser = `sales_${username}`;
-            localStorage.setItem('loggedInUser', username);
-            loginSection.style.display = 'none';
-            salesSection.style.display = 'block';
-            loadSalesRecords();
+            displaySalesRanking();
+            displayExpenses();
         } else {
-            alert('ユーザー名またはパスワードが間違っています。');
-        }
-    });
-
-    // ユーザー登録処理
-    registerForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = newUsernameInput.value.trim();
-        const password = newPasswordInput.value;
-
-        if (localStorage.getItem(`user_${username}`)) {
-            alert('このユーザー名はすでに登録されています。');
-        } else {
-            localStorage.setItem(`user_${username}`, JSON.stringify({ username, password }));
-            alert('ユーザー登録が完了しました。');
-            registerForm.reset();
+            alert('管理者名またはパスワードが間違っています。');
         }
     });
 
     // ログアウト処理
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('loggedInUser');
-        currentUser = null;
-        salesRecords = [];
-        loginSection.style.display = 'block';
-        salesSection.style.display = 'none';
+    adminLogoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('loggedInAdmin');
+        adminLoginForm.style.display = 'block';
+        adminDataSection.style.display = 'none';
+        adminLoginForm.reset();
     });
 
-    // 商品リストをドロップダウンに追加する
-    productData.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.price;
-        option.textContent = product.name;
-        productNameSelect.appendChild(option);
-    });
-
-    // フォーム送信時に販売記録を追加する
-    form.addEventListener('submit', (e) => {
+    // 給料設定処理
+    salaryForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        const username = salaryUsernameInput.value.trim();
+        const salary = parseInt(salaryAmountInput.value);
 
-        const productName = productNameSelect.options[productNameSelect.selectedIndex].text;
-        const salesAmount = productNameSelect.value;
-        const timestamp = new Date().toLocaleString();
+        userSalaries[username] = salary;
+        localStorage.setItem('userSalaries', JSON.stringify(userSalaries));
+        alert(`ユーザー ${username} の給料を ${formatNumber(salary)} 円に設定しました。`);
 
-        const newRecord = { productName, salesAmount, timestamp };
-        salesRecords.push(newRecord);
-
-        // ローカルストレージに保存
-        localStorage.setItem(currentUser, JSON.stringify(salesRecords));
-
-        // フォームをリセット
-        form.reset();
-
-        // 販売記録を再表示
-        displaySalesRecords();
-        displayUserSalesSummary();
+        salaryForm.reset();
+        displayExpenses();
     });
 
-    // CSVとしてエクスポートする
-    exportBtn.addEventListener('click', () => {
-        let csvContent = "data:text/csv;charset=utf-8,商品名,販売金額（円）,記録日時\n";
-        salesRecords.forEach(record => {
-            csvContent += `${record.productName},${record.salesAmount},${record.timestamp}\n`;
+    // 経費登録処理
+    expenseForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = expenseUsernameInput.value.trim();
+        const expenseType = expenseTypeInput.value;
+        const expenseAmount = parseInt(expenseAmountInput.value);
+
+        if (!userExpenses[username]) {
+            userExpenses[username] = [];
+        }
+
+        userExpenses[username].push({ type: expenseType, amount: expenseAmount });
+        localStorage.setItem('userExpenses', JSON.stringify(userExpenses));
+        alert(`ユーザー ${username} に ${expenseType} の経費 ${formatNumber(expenseAmount)} 円を追加しました。`);
+
+        expenseForm.reset();
+        displayExpenses();
+    });
+
+    // 全ユーザーの販売記録を表示
+    const loadAllUserSalesRecords = () => {
+        adminSalesTableBody.innerHTML = '';
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sales_')) {
+                const username = key.replace('sales_', '');
+                const userSalesRecords = JSON.parse(localStorage.getItem(key)) || [];
+                userSalesRecords.forEach((record, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${username}</td>
+                        <td>${record.productName}</td>
+                        <td>${formatNumber(record.salesAmount)}</td>
+                        <td>${record.timestamp}</td>
+                        <td>
+                            <button onclick="deleteAdminRecord('${username}', ${index})">削除</button>
+                        </td>
+                    `;
+                    adminSalesTableBody.appendChild(row);
+                });
+            }
         });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', 'sales_records.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-
-    // 販売記録の削除
-    window.deleteRecord = (index) => {
-        salesRecords.splice(index, 1);
-        localStorage.setItem(currentUser, JSON.stringify(salesRecords));
-        displaySalesRecords();
-        displayUserSalesSummary();
     };
 
-    // ユーザーごとの売り上げ合計を表示
+    // 販売記録の削除
+    window.deleteAdminRecord = (username, index) => {
+        const userSalesKey = `sales_${username}`;
+        let userSalesRecords = JSON.parse(localStorage.getItem(userSalesKey)) || [];
+        userSalesRecords.splice(index, 1);
+        localStorage.setItem(userSalesKey, JSON.stringify(userSalesRecords));
+        loadAllUserSalesRecords();
+        displayUserSalesSummary();
+        displaySalesRanking();
+        displayExpenses();
+    };
+
+    // ユーザーごとの月次売上金額を表示
     const displayUserSalesSummary = () => {
-        const summarySection = document.getElementById('user-sales-summary');
-        const monthlySales = {};
+        userSalesSummaryTableBody.innerHTML = '';
+        const userMonthlySales = {};
 
-        salesRecords.forEach(record => {
-            const date = new Date(record.timestamp);
-            const month = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2); // YYYY-MM形式
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sales_')) {
+                const username = key.replace('sales_', '');
+                const userSalesRecords = JSON.parse(localStorage.getItem(key)) || [];
+                userSalesRecords.forEach(record => {
+                    const date = new Date(record.timestamp);
+                    const month = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2); // YYYY-MM形式
 
-            if (!monthlySales[month]) {
-                monthlySales[month] = 0;
+                    if (!userMonthlySales[username]) {
+                        userMonthlySales[username] = {};
+                    }
+                    if (!userMonthlySales[username][month]) {
+                        userMonthlySales[username][month] = 0;
+                    }
+
+                    userMonthlySales[username][month] += parseInt(record.salesAmount);
+                });
             }
-
-            monthlySales[month] += parseInt(record.salesAmount);
         });
 
-        summarySection.innerHTML = '';
-        for (const [month, totalSales] of Object.entries(monthlySales)) {
-            const summaryRow = document.createElement('div');
-            summaryRow.textContent = `${month}: 合計売り上げ: ${totalSales} 円`;
-            summarySection.appendChild(summaryRow);
+        for (const [username, monthlySales] of Object.entries(userMonthlySales)) {
+            for (const [month, totalSales] of Object.entries(monthlySales)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${username}</td>
+                    <td>${month}</td>
+                    <td>${formatNumber(totalSales)}</td>
+                `;
+                userSalesSummaryTableBody.appendChild(row);
+            }
         }
     };
 
+    // 売上ランキングを表示
+    const displaySalesRanking = () => {
+        salesRankingTableBody.innerHTML = '';
+        const userTotalSales = {};
+
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sales_')) {
+                const username = key.replace('sales_', '');
+                const userSalesRecords = JSON.parse(localStorage.getItem(key)) || [];
+                const totalSales = userSalesRecords.reduce((sum, record) => sum + parseInt(record.salesAmount), 0);
+                userTotalSales[username] = totalSales;
+            }
+        });
+
+        const sortedUsers = Object.entries(userTotalSales).sort((a, b) => b[1] - a[1]);
+
+        sortedUsers.forEach(([username, totalSales], index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${username}</td>
+                <td>${formatNumber(totalSales)}</td>
+            `;
+            salesRankingTableBody.appendChild(row);
+        });
+    };
+
+    // 経費と損益分岐点を表示
+    const displayExpenses = () => {
+        expensesTableBody.innerHTML = '';
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sales_')) {
+                const username = key.replace('sales_', '');
+                const userSalesRecords = JSON.parse(localStorage.getItem(key)) || [];
+                const totalSales = userSalesRecords.reduce((sum, record) => sum + parseInt(record.salesAmount), 0);
+                const salary = userSalaries[username] || 0;
+                const expenses = (userExpenses[username] || []).reduce((sum, expense) => sum + expense.amount, 0) + salary;
+                const breakEvenPoint = totalSales - expenses;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${username}</td>
+                    <td>${formatNumber(salary)}</td>
+                    <td>${formatNumber(expenses)}</td>
+                    <td>${formatNumber(breakEvenPoint)}</td>
+                `;
+                expensesTableBody.appendChild(row);
+            }
+        });
+    };
+
     // 初期表示時にログイン状態をチェック
-    const loggedInUser = localStorage.getItem('loggedInUser');
-    if (loggedInUser) {
-        currentUser = `sales_${loggedInUser}`;
-        loginSection.style.display = 'none';
-        salesSection.style.display = 'block';
-        loadSalesRecords();
+    const loggedInAdmin = localStorage.getItem('loggedInAdmin');
+    if (loggedInAdmin === 'admin') {
+        adminLoginForm.style.display = 'none';
+        adminDataSection.style.display = 'block';
+        loadAllUserSalesRecords();
+        displayUserSalesSummary();
+        displaySalesRanking();
+        displayExpenses();
     } else {
-        loginSection.style.display = 'block';
-        salesSection.style.display = 'none';
+        adminLoginForm.style.display = 'block';
+        adminDataSection.style.display = 'none';
     }
 });
