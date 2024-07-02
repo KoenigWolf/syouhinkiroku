@@ -11,17 +11,17 @@
         <div id="login-section">
             <h2>ログイン</h2>
             <form id="login-form">
-                <label for="username">ユーザー名:</label>
+                <label for="username">ユーザー名</label>
                 <input type="text" id="username" name="username" required>
-                <label for="password">パスワード:</label>
+                <label for="password">パスワード</label>
                 <input type="password" id="password" name="password" required>
                 <button type="submit">ログイン</button>
             </form>
             <h2>新規ユーザー登録</h2>
             <form id="register-form">
-                <label for="new-username">ユーザー名:</label>
+                <label for="new-username">ユーザー名</label>
                 <input type="text" id="new-username" name="new-username" required>
-                <label for="new-password">パスワード:</label>
+                <label for="new-password">パスワード</label>
                 <input type="password" id="new-password" name="new-password" required>
                 <button type="submit">登録</button>
             </form>
@@ -29,7 +29,7 @@
         <div id="sales-section" style="display:none;">
             <h2>販売記録入力</h2>
             <form id="sales-form">
-                <label for="product-name">商品名:</label>
+                <label for="product-name">商品名</label>
                 <select id="product-name" name="product-name" required>
                     <!-- 商品リストがここに追加されます -->
                 </select>
@@ -38,6 +38,7 @@
             </form>
 
             <h2>販売記録</h2>
+            <div id="user-sales-summary"></div>
             <table id="sales-table">
                 <thead>
                     <tr>
@@ -53,6 +54,31 @@
             </table>
             <button id="export-btn">CSVとしてエクスポート</button>
             <button id="logout-btn">ログアウト</button>
+        </div>
+        <div id="admin-section" style="display:none;">
+            <h2>管理者ログイン</h2>
+            <form id="admin-login-form">
+                <label for="admin-username">ユーザー名</label>
+                <input type="text" id="admin-username" name="admin-username" required>
+                <label for="admin-password">パスワード</label>
+                <input type="password" id="admin-password" name="admin-password" required>
+                <button type="submit">ログイン</button>
+            </form>
+            <h2>全ユーザーの販売記録</h2>
+            <table id="admin-sales-table">
+                <thead>
+                    <tr>
+                        <th>ユーザー名</th>
+                        <th>商品名</th>
+                        <th>販売金額（円）</th>
+                        <th>記録日時</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 全ユーザーの販売記録がここに表示されます -->
+                </tbody>
+            </table>
+            <button id="admin-logout-btn">ログアウト</button>
         </div>
     </div>
     <script src="script.js"></script>
